@@ -9,26 +9,28 @@ public class NewsController : ControllerBase
 
 
     [HttpGet]
-    public IActionResult GetNewsForPeriod([FromQuery]DateTimeOffset  from,  [FromQuery]DateTimeOffset  to)
+    public IActionResult GetNewsForPeriod([FromQuery] DateTimeOffset from, [FromQuery] DateTimeOffset to)
     {
-        int a = 5;
-        a = a / 3;
-        Console.WriteLine($"A is equal = {a}");
-        var requestedTime = new Times(from, to);
-        Console.WriteLine($"TIMES = {requestedTime.StartDate} - {requestedTime.EndDate}");
-        return Ok(requestedTime);
+        return BadRequest();
     }
-    
+
+    [HttpPost]
+    public IActionResult AddNews([FromBody] NewsItem  newsItem)
+    {
+        return BadRequest();
+    }
+
+    [HttpPost]
+    public IActionResult DeleteNews()
+    {
+        return BadRequest();
+    }
 }
 
-public class Times
+public class NewsItem
 {
-    public DateTimeOffset StartDate { get; set; }
-    public DateTimeOffset EndDate{ get; set; }
-    
-    public  Times(DateTimeOffset startDate, DateTimeOffset endDate)
-    {
-        this.StartDate = startDate;
-        this.EndDate = endDate;
-    }
+    public int Id { get; set; }
+    public string Title { get; set; }
+    public DateTimeOffset releaseTime { get; set; }
+    public int ViewCount { get; set; }
 }
