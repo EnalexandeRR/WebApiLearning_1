@@ -1,4 +1,4 @@
-using WebApplication1.Interfaces;
+using MyWebApp.Interfaces;
 
 namespace MyWebApp;
 

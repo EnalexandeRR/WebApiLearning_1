@@ -1,5 +1,5 @@
 using MyWebApp;
-using WebApplication1.Interfaces;
+using MyWebApp.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
