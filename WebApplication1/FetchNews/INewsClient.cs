@@ -2,5 +2,5 @@ namespace MyWebApp.Interfaces;
 
 public interface INewsClient
 {
-    Task FetchNewsAsync(CancellationToken cancellationToken);
+    Task<string> FetchNewsAsync(CancellationToken cancellationToken);
 }

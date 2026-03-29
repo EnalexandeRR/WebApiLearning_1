@@ -1,4 +1,5 @@
 using MyWebApp.Interfaces;
+using System.Text.Json;
 
 namespace MyWebApp;
 
@@ -15,19 +16,27 @@ public class NewsParseWorker: BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(15), stoppingToken);
             try
             {
                 using (var scope = _scopeFactory.CreateScope())
                 {
                     Console.WriteLine($"Start fetching news: {DateTime.Now}");
                     var newClient = scope.ServiceProvider.GetRequiredService<INewsClient>();
-                    await newClient.FetchNewsAsync(stoppingToken);
+                    var parser = scope.ServiceProvider.GetRequiredService<INewsPageParser>();
+                    
+                    string htmlContent = await newClient.FetchNewsAsync(stoppingToken);
+                    List<NewsItem> newsItemsList = await parser.ParseHtmlAsync(htmlContent);
+                    //TODO: for debug only, delete later!
+                    foreach (var newsItem in newsItemsList)
+                    {
+                       Console.WriteLine(newsItem.ToString());
+                    }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine($"Got exception while executing command: {ex.Message}");
             }
         }
     }

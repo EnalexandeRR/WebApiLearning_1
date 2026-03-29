@@ -9,12 +9,13 @@ public class NewsClient : INewsClient
         _httpClient = httpClient;
     }
     
-    public async Task FetchNewsAsync(CancellationToken stoppingToken)
+    public async Task<string> FetchNewsAsync(CancellationToken stoppingToken)
     {
         var response = await _httpClient.GetAsync("/ru/news",  stoppingToken);
         if (response.IsSuccessStatusCode)
         {
-            Console.WriteLine("NEWS  RESPONSE COMPLETED!");
+            return await response.Content.ReadAsStringAsync(stoppingToken);
         }
+        return string.Empty;
     }
 }
