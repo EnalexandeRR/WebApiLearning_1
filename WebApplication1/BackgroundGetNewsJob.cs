@@ -7,11 +7,13 @@ public class BackgroundGetNewsJob : IJob
 {
     private readonly INewsClient _newsClient;
     private readonly INewsPageParser _parser;
+    private readonly INewsRepository _repository;
 
-    public BackgroundGetNewsJob(INewsClient newsClient, INewsPageParser parser)
+    public BackgroundGetNewsJob(INewsClient newsClient, INewsPageParser parser, INewsRepository newsRepository)
     {
         _newsClient = newsClient;
         _parser = parser;
+        _repository = newsRepository;
     }
     
     public async Task Execute(IJobExecutionContext context)
@@ -20,6 +22,7 @@ public class BackgroundGetNewsJob : IJob
         {
             string htmlContent = await _newsClient.FetchNewsAsync(context.CancellationToken);
             List<NewsItem> newsItemsList = await _parser.ParseHtmlAsync(htmlContent);
+            await _repository.SaveNewsToDb(newsItemsList);
             //TODO: for debug only, delete later!
             /*foreach (var newsItem in newsItemsList)
             {
