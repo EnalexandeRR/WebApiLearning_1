@@ -1,6 +1,3 @@
-using MyWebApp.Interfaces;
-using System.Text.Json;
-
 namespace MyWebApp;
 
 public class NewsParseWorker: BackgroundService

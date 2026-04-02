@@ -1,4 +1,4 @@
-namespace MyWebApp.Interfaces;
+namespace MyWebApp;
 
 public interface INewsClient
 {

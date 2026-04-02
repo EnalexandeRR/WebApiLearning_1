@@ -28,8 +28,7 @@ public class NewsRepository: INewsRepository
             using (var transaction = db.BeginTransaction())
             {
                 var sqlQuery = $"INSERT INTO {_tableName} (id, title, releaseTime, viewCount) VALUES(@Id, @Title, @ReleaseTime, @ViewCount)";
-                var isAdded = await db.ExecuteAsync(sqlQuery, newsItems, transaction);
-                Console.WriteLine($"db isAdded? = {isAdded}");
+                await db.ExecuteAsync(sqlQuery, newsItems, transaction);
                 transaction.Commit();
             }
         }

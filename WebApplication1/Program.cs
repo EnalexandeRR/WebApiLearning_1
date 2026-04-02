@@ -1,7 +1,7 @@
-using MyWebApp;
-using MyWebApp.Interfaces;
 using System.Text;
 using Quartz;
+using MyWebApp;
+
 Console.OutputEncoding = Encoding.UTF8;
 //TODO: absolute path for now! fix later!
 string dbConnectionString = @"Data Source=C:\Users\ayenu\RiderProjects\WebApiLearning_1\db\test.db;";
@@ -11,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddTransient<INewsPageParser, NewsPageParser>();
 builder.Services.AddScoped<INewsRepository, NewsRepository>(provider => new NewsRepository(dbConnectionString, tableName));
+builder.Services.AddScoped<INewsService, NewsService>();
 builder.Services.AddHttpClient<INewsClient, NewsClient>(client =>
 {
     client.BaseAddress = new Uri("https://khabar.kz/");
