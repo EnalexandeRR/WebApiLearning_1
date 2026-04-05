@@ -40,10 +40,14 @@ public class NewsService: INewsService
         }
     }
 
-    public async Task<bool> GetNewsByPeriodAsync()
+    public async Task<IEnumerable<NewsItem>> GetNewsByPeriodAsync(DateTimeOffset from,DateTimeOffset to)
     {
-        Console.WriteLine("GetNewsByPeriodAsync");
-        return true;
+        var news = await _repository.GetNews(from,to);
+        foreach (var newsItem in news)
+        {
+            Console.WriteLine($"GetNewsByPeriodAsync result {newsItem}");
+        }
+        return news;
     }
 
     public async Task<bool> AddNewsManualAsync()

@@ -7,7 +7,7 @@ namespace MyWebApp;
 public interface INewsRepository
 {
     Task SaveNewsToDb(IEnumerable<NewsItem> newsItem);
-    void GetNews();
+    Task<IEnumerable<NewsItem>> GetNews(DateTimeOffset from,DateTimeOffset to);
 }
 
 public class NewsRepository: INewsRepository
@@ -17,7 +17,7 @@ public class NewsRepository: INewsRepository
     public NewsRepository(IConfiguration config)
     {
         _dbConnectionString = config.GetConnectionString("DefaultConnection");
-        _tableName = config.GetConnectionString("DefaultTableNam");
+        _tableName = config.GetConnectionString("DefaultTableName");
     }
     
     public async Task SaveNewsToDb(IEnumerable<NewsItem> newsItems)
@@ -35,8 +35,14 @@ public class NewsRepository: INewsRepository
         Console.WriteLine("(TEST) news item created in DATABASE!");
     }
 
-    public void GetNews()
+    public async Task<IEnumerable<NewsItem>> GetNews(DateTimeOffset from,DateTimeOffset to)
     {
-        Console.WriteLine("(TEST) got the news from DATABASE!");
+        
+        Console.WriteLine($"Tru to get news from {from} to {to}");
+        using (var db = new SqliteConnection(_dbConnectionString))
+        {
+           return await db.QueryAsync<NewsItem>("SELECT * FROM news WHERE releaseTime >= @from and releaseTime <= @to",
+               new { from = from.ToUniversalTime(),to = to.ToUniversalTime()} );
+        }
     }
 }

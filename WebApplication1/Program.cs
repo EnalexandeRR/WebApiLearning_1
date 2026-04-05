@@ -1,4 +1,5 @@
 using System.Text;
+using Dapper;
 using Quartz;
 using MyWebApp;
 using MyWebApp.Configuration;
@@ -29,6 +30,7 @@ builder.Services.AddQuartz(options =>
                     .WithIntervalInSeconds(15).RepeatForever()));
 });
 builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
+SqlMapper.AddTypeHandler(new SqliteDateTimeOffsetHandler());
 
 var app = builder.Build();
 

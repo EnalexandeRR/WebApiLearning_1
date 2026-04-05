@@ -16,9 +16,9 @@ public class NewsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetNewsForPeriod([FromQuery] DateTimeOffset from, [FromQuery] DateTimeOffset to)
     {
-        var isOk = await _newsService.GetNewsByPeriodAsync();
-        if(isOk) return Ok();
-        return BadRequest();
+        var newsResultList = await _newsService.GetNewsByPeriodAsync(from, to);
+        if(newsResultList.Any()) return Ok(newsResultList);
+        return NoContent();
     }
 
     [HttpPost]

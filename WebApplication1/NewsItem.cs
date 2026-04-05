@@ -9,6 +9,6 @@ public class NewsItem
     
     public override string ToString()
     {
-        return $"Новость: ID:{Id} Заголовок: {Title} Дата публикации:{ReleaseTime} Просмотров: {ViewCount}";
+        return $"Новость: ID:{Id} Заголовок: {Title} Дата публикации:{ReleaseTime.ToString()} Просмотров: {ViewCount}";
     }
 }
