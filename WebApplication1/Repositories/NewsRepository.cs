@@ -14,10 +14,10 @@ public class NewsRepository: INewsRepository
 {
     private readonly string _dbConnectionString;
     private readonly string _tableName;
-    public NewsRepository(string dbConnectionString, string tableName)
+    public NewsRepository(IConfiguration config)
     {
-        _dbConnectionString = dbConnectionString;
-        _tableName = tableName;
+        _dbConnectionString = config.GetConnectionString("DefaultConnection");
+        _tableName = config.GetConnectionString("DefaultTableNam");
     }
     
     public async Task SaveNewsToDb(IEnumerable<NewsItem> newsItems)

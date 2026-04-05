@@ -1,21 +1,21 @@
 using System.Text;
 using Quartz;
 using MyWebApp;
+using MyWebApp.Configuration;
 
 Console.OutputEncoding = Encoding.UTF8;
-//TODO: absolute path for now! fix later!
-string dbConnectionString = @"Data Source=C:\Users\ayenu\RiderProjects\WebApiLearning_1\db\test.db;";
-string tableName = "test";
-//
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.Configure<NewsClientSettings>(builder.Configuration.GetSection("NewsClientSettings"));
 builder.Services.AddControllers();
 builder.Services.AddTransient<INewsPageParser, NewsPageParser>();
-builder.Services.AddScoped<INewsRepository, NewsRepository>(provider => new NewsRepository(dbConnectionString, tableName));
+builder.Services.AddScoped<INewsRepository, NewsRepository>();
 builder.Services.AddScoped<INewsService, NewsService>();
-builder.Services.AddHttpClient<INewsClient, NewsClient>(client =>
+builder.Services.AddHttpClient<INewsClient, NewsClient>((sp, client) =>
 {
-    client.BaseAddress = new Uri("https://khabar.kz/");
-    client.Timeout = TimeSpan.FromSeconds(15);
+    var settings = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<NewsClientSettings>>().Value;
+    
+    client.BaseAddress = new Uri(settings.BaseUrl);
+    client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
 } );
 
 builder.Services.AddQuartz(options =>
