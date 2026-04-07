@@ -26,7 +26,7 @@ public class NewsController : ControllerBase
     public async Task<IActionResult> AddNewsAsync([FromBody] AddNewsRequest request)
     {
         var isAdded = await _newsService.AddNewsManualAsync(request);
-        if(isAdded) return Ok(new GetNewsResponse{StatusCode = 0, Message = "News article added!"});
+        if(isAdded) return Ok(new BaseResponse{StatusCode = 0, Message = "News article added!"});
         return Ok(new BaseResponse{StatusCode = -999, Message = "Failed to add new article!"});
     }
 
