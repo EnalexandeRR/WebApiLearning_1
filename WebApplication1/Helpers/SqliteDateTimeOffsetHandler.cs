@@ -1,7 +1,7 @@
 using System.Data;
 using Dapper;
 
-namespace MyWebApp;
+namespace WebApplication1.Helpers;
 
 public class SqliteDateTimeOffsetHandler: SqlMapper.TypeHandler<DateTimeOffset>
 {

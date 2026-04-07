@@ -1,7 +1,7 @@
-using MyWebApp.Models;
 using Quartz;
+using WebApplication1.Models;
 
-namespace MyWebApp;
+namespace WebApplication1.Services;
 
 public interface INewsService
 {

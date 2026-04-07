@@ -1,8 +1,10 @@
-using MyWebApp.Models;
 using Quartz;
+using WebApplication1.Clients;
+using WebApplication1.Helpers;
+using WebApplication1.Models;
+using WebApplication1.Repositories;
 
-
-namespace MyWebApp;
+namespace WebApplication1.Services;
 
 public class NewsService: INewsService
 {

@@ -1,4 +1,4 @@
-namespace MyWebApp.Configuration;
+namespace WebApplication1.Configuration;
 
 public class NewsClientSettings
 {

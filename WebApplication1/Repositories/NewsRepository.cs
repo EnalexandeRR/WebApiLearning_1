@@ -1,9 +1,9 @@
 using System.Data;
 using Dapper;
 using Microsoft.Data.Sqlite;
-using MyWebApp.Models;
+using WebApplication1.Models;
 
-namespace MyWebApp;
+namespace WebApplication1.Repositories;
 
 
 public class NewsRepository: INewsRepository

@@ -1,11 +1,12 @@
 using Quartz;
+using WebApplication1.Clients;
+using WebApplication1.Repositories;
 
-namespace MyWebApp;
+namespace WebApplication1.Services;
 
 public class BackgroundGetNewsJob : IJob
 {
     private readonly INewsClient _newsClient;
-    private readonly INewsPageParser _parser;
     private readonly INewsRepository _repository;
     private readonly INewsService _newsService;
 

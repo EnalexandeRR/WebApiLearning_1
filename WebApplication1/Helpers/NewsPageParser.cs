@@ -1,7 +1,7 @@
 using System.Globalization;
 using AngleSharp.Html.Parser;
 
-namespace MyWebApp;
+namespace WebApplication1.Helpers;
 
 public static class NewsPageParser
 {

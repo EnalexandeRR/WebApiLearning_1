@@ -1,4 +1,4 @@
-namespace MyWebApp.Models;
+namespace WebApplication1.Models;
 
 public class GetNewsResponse : BaseResponse
 {

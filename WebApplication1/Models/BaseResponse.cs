@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace MyWebApp.Models;
+namespace WebApplication1.Models;
 
 public class BaseResponse
 {
