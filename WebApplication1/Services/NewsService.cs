@@ -1,4 +1,6 @@
+using MyWebApp.Models;
 using Quartz;
+
 
 namespace MyWebApp;
 
@@ -6,12 +8,11 @@ public class NewsService: INewsService
 {
     private readonly INewsRepository _repository;
     private readonly INewsClient _newsClient;
-    private readonly INewsPageParser _parser;
-    public NewsService(INewsRepository repository, INewsClient newsClient, INewsPageParser parser)
+    
+    public NewsService(INewsRepository repository, INewsClient newsClient)
     {
         _repository = repository;
         _newsClient = newsClient;
-        _parser = parser;
     }
     
     public async Task FetchAndSaveNewsAsync(IJobExecutionContext context)
@@ -20,18 +21,13 @@ public class NewsService: INewsService
         {
             string htmlContent = await _newsClient.FetchNewsAsync(context.CancellationToken);
             
-            List<NewsItem> newsItemsList = await _parser.ParseHtmlAsync(htmlContent);
+            List<NewsItem> newsItemsList = await NewsPageParser.ParseHtmlAsync(htmlContent);
             
             if (newsItemsList.Count > 0)
             {
-                await _repository.SaveNewsToDb(newsItemsList);
+                newsItemsList.Sort((a,b)=> a.ReleaseTime.CompareTo(b.ReleaseTime) );
+                await _repository.SaveNewsToDbAsync(newsItemsList);
             }
-            
-            //TODO: for debug only, delete later!
-            /*foreach (var newsItem in newsItemsList)
-            {
-                Console.WriteLine(newsItem.ToString());
-            }*/
             Console.WriteLine("Received new news!");
         }
         catch (Exception ex)
@@ -40,9 +36,9 @@ public class NewsService: INewsService
         }
     }
 
-    public async Task<IEnumerable<NewsItem>> GetNewsByPeriodAsync(DateTimeOffset from,DateTimeOffset to)
+    public async Task<IEnumerable<NewsItem>> GetNewsByPeriodAsync(GetNewsRequest request)
     {
-        var news = await _repository.GetNews(from,to);
+        var news = await _repository.GetNewsAsync(request);
         foreach (var newsItem in news)
         {
             Console.WriteLine($"GetNewsByPeriodAsync result {newsItem}");
@@ -50,10 +46,9 @@ public class NewsService: INewsService
         return news;
     }
 
-    public async Task<bool> AddNewsManualAsync()
+    public async Task<bool> AddNewsManualAsync(AddNewsRequest request)
     {
-        Console.WriteLine("AddNewsManualAsync");
-        return true;
+        return await _repository.AddNewsToDbAsync(request);
     }
 
     public async Task<bool> DeleteNewsAsync()

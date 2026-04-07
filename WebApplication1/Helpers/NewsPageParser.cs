@@ -3,9 +3,9 @@ using AngleSharp.Html.Parser;
 
 namespace MyWebApp;
 
-public class NewsPageParser: INewsPageParser
+public static class NewsPageParser
 {
-    public async Task<List<NewsItem>> ParseHtmlAsync(string html)
+    public static async Task<List<NewsItem>> ParseHtmlAsync(string html)
     {
         var newsList = new List<NewsItem>();
         var parser = new HtmlParser();
@@ -27,10 +27,11 @@ public class NewsPageParser: INewsPageParser
                 ViewCount = int.TryParse(viewCount.TextContent.Trim(), out var count) ? count : 0
             });
         }
+        
         return newsList;
     }
 
-    private DateTimeOffset ParseDate(string dateString)
+    private static DateTimeOffset ParseDate(string dateString)
     {
         var dateFormat = "dd.MM.yyyy, HH:mm";
 

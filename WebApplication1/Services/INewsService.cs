@@ -1,3 +1,4 @@
+using MyWebApp.Models;
 using Quartz;
 
 namespace MyWebApp;
@@ -5,7 +6,7 @@ namespace MyWebApp;
 public interface INewsService
 {
     Task FetchAndSaveNewsAsync(IJobExecutionContext context);
-    Task<IEnumerable<NewsItem>> GetNewsByPeriodAsync(DateTimeOffset from,DateTimeOffset to);
-    Task<bool> AddNewsManualAsync();
+    Task<IEnumerable<NewsItem>> GetNewsByPeriodAsync(GetNewsRequest request);
+    Task<bool> AddNewsManualAsync(AddNewsRequest request);
     Task<bool> DeleteNewsAsync();
 }

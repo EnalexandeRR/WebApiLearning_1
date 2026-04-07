@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MyWebApp.Models;
 
 namespace MyWebApp;
 
@@ -13,24 +14,24 @@ public class NewsController : ControllerBase
         _newsService = newsService;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetNewsForPeriod([FromQuery] DateTimeOffset from, [FromQuery] DateTimeOffset to)
+    [HttpGet("getbyperiod")]
+    public async Task<IActionResult> GetNewsForPeriodAsync([FromQuery] GetNewsRequest request)
     {
-        var newsResultList = await _newsService.GetNewsByPeriodAsync(from, to);
-        if(newsResultList.Any()) return Ok(newsResultList);
-        return NoContent();
+        var newsResultList = await _newsService.GetNewsByPeriodAsync(request);
+        if(newsResultList.Any()) return Ok(new GetNewsResponse{StatusCode = 0, Message = "", NewsItemsCollection = newsResultList});
+        return Ok(new BaseResponse{StatusCode = 0, Message = "No news found for period!"});
     }
 
-    [HttpPost]
-    public async Task<IActionResult> AddNews([FromBody] NewsItem  newsItem)
+    [HttpPost("add")]
+    public async Task<IActionResult> AddNewsAsync([FromBody] AddNewsRequest request)
     {
-        var isOk = await _newsService.AddNewsManualAsync();
-        if(isOk) return Ok();
-        return BadRequest();
+        var isAdded = await _newsService.AddNewsManualAsync(request);
+        if(isAdded) return Ok(new GetNewsResponse{StatusCode = 0, Message = "News article added!"});
+        return Ok(new BaseResponse{StatusCode = -999, Message = "Failed to add new article!"});
     }
 
-    [HttpDelete]
-    public async Task<IActionResult> DeleteNews()
+    [HttpDelete("delete")]
+    public async Task<IActionResult> DeleteNewsAsync()
     {
         var isOk = await _newsService.DeleteNewsAsync();
         if(isOk) return Ok();
