@@ -49,10 +49,13 @@ public class NewsRepository: INewsRepository
         using (IDbConnection db = new SqliteConnection(_dbConnectionString))
         {
             var sqlQuery = $"INSERT INTO {_tableName} (title, releaseTime, viewCount) VALUES(@Title, @ReleaseTime, @ViewCount)";
+            DateTimeOffset dt = DateTimeOffset.Now;
+            DateTimeOffset currentUniversalTime = dt.AddTicks(-(dt.Ticks % TimeSpan.TicksPerSecond)).ToUniversalTime();
+            
             var lines = await db.ExecuteAsync(sqlQuery, new
             {
                 request.Title,
-                ReleaseTime = request.ReleaseTime.ToUniversalTime(),
+                ReleaseTime = currentUniversalTime,
                 request.ViewCount
             });
             return lines > 0;
