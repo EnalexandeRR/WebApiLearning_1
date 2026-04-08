@@ -1,14 +1,16 @@
 using System.Text;
 using Dapper;
 using Quartz;
-using MyWebApp;
-using MyWebApp.Configuration;
+using WebApplication1.Clients;
+using WebApplication1.Configuration;
+using WebApplication1.Helpers;
+using WebApplication1.Repositories;
+using WebApplication1.Services;
 
 Console.OutputEncoding = Encoding.UTF8;
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.Configure<NewsClientSettings>(builder.Configuration.GetSection("NewsClientSettings"));
+builder.Services.Configure<NewsClientSettings>(builder.Configuration.GetSection(nameof(NewsClientSettings)));
 builder.Services.AddControllers();
-builder.Services.AddTransient<INewsPageParser, NewsPageParser>();
 builder.Services.AddScoped<INewsRepository, NewsRepository>();
 builder.Services.AddScoped<INewsService, NewsService>();
 builder.Services.AddHttpClient<INewsClient, NewsClient>((sp, client) =>

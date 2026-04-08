@@ -31,11 +31,11 @@ public class NewsController : ControllerBase
         return Ok(new BaseResponse{StatusCode = -999, Message = "Failed to add new article!"});
     }
 
-    [HttpDelete("delete")]
-    public async Task<IActionResult> DeleteNewsAsync()
+    [HttpDelete("delete/id")]
+    public async Task<IActionResult> DeleteNewsByIdAsync([FromBody] DeleteByIdRequest request)
     {
-        var isOk = await _newsService.DeleteNewsAsync();
-        if(isOk) return Ok();
-        return BadRequest();
+        var isDeleted = await _newsService.DeleteNewsByIdAsync(request);
+        if(isDeleted) return Ok(new BaseResponse{StatusCode = 0, Message = $"News id: {request.Id} deleted successfully!"});
+        return Ok(new BaseResponse{StatusCode = -999, Message = $"Something went wrong while deleting the news id: {request.Id}!"});
     }
 }

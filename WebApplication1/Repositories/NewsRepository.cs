@@ -16,7 +16,7 @@ public class NewsRepository: INewsRepository
         _tableName = config.GetConnectionString("DefaultTableName");
     }
     
-    public async Task SaveNewsToDbAsync(IEnumerable<NewsItem> newsItems)
+    public async Task<bool> SaveNewsToDbAsync(IEnumerable<NewsItem> newsItems)
     {
         using (IDbConnection db = new SqliteConnection(_dbConnectionString))
         {
@@ -28,8 +28,9 @@ public class NewsRepository: INewsRepository
                 transaction.Commit();
             }
         }
-        
         Console.WriteLine("(TEST) news item created in DATABASE!");
+        //TODO: only for tests now!
+        return true;
     }
 
     public async Task<IEnumerable<NewsItem>> GetNewsAsync(GetNewsRequest request)
@@ -55,6 +56,16 @@ public class NewsRepository: INewsRepository
                 request.ViewCount
             });
             return lines > 0;
+        }
+    }
+
+    public async Task<bool> DeleteNewsByIdAsync(DeleteByIdRequest request)
+    {
+        using (IDbConnection db = new SqliteConnection(_dbConnectionString))
+        {
+            var sqlQuery = $"DELETE FROM {_tableName} WHERE id = @Id";
+            var deletedLines = await db.ExecuteAsync(sqlQuery, request);
+            return deletedLines > 0;
         }
     }
 }

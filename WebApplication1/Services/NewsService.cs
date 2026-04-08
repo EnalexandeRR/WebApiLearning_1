@@ -17,7 +17,7 @@ public class NewsService: INewsService
         _newsClient = newsClient;
     }
     
-    public async Task FetchAndSaveNewsAsync(IJobExecutionContext context)
+    public async Task<bool> FetchAndSaveNewsAsync(IJobExecutionContext context)
     {
         try
         {
@@ -28,24 +28,22 @@ public class NewsService: INewsService
             if (newsItemsList.Count > 0)
             {
                 newsItemsList.Sort((a,b)=> a.ReleaseTime.CompareTo(b.ReleaseTime) );
-                await _repository.SaveNewsToDbAsync(newsItemsList);
+                var isSaved  = await _repository.SaveNewsToDbAsync(newsItemsList);
+                Console.WriteLine("Received new news!");
+                return isSaved;
             }
-            Console.WriteLine("Received new news!");
+            return false;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Something went wrong! Message: {ex.Message}, {ex.StackTrace}");
+            return false;
         }
     }
 
     public async Task<IEnumerable<NewsItem>> GetNewsByPeriodAsync(GetNewsRequest request)
     {
-        var news = await _repository.GetNewsAsync(request);
-        foreach (var newsItem in news)
-        {
-            Console.WriteLine($"GetNewsByPeriodAsync result {newsItem}");
-        }
-        return news;
+        return await _repository.GetNewsAsync(request);
     }
 
     public async Task<bool> AddNewsManualAsync(AddNewsRequest request)
@@ -53,9 +51,8 @@ public class NewsService: INewsService
         return await _repository.AddNewsToDbAsync(request);
     }
 
-    public async Task<bool> DeleteNewsAsync()
+    public async Task<bool> DeleteNewsByIdAsync(DeleteByIdRequest request)
     {
-        Console.WriteLine("DeleteNewsAsync");
-        return true;
+        return await _repository.DeleteNewsByIdAsync(request);
     }
 }
