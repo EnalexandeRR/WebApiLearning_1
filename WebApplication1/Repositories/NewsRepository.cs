@@ -71,4 +71,14 @@ public class NewsRepository: INewsRepository
             return deletedLines > 0;
         }
     }
+
+    public async Task<DateTimeOffset?> GetLastAddedTime()
+    {
+        using (IDbConnection db = new SqliteConnection(_dbConnectionString))
+        {
+            var sqlQuery = $"SELECT MAX(releaseTime) FROM {_tableName}";
+            var result = await db.QueryFirstOrDefaultAsync<DateTimeOffset?>(sqlQuery);
+            return result;
+        }
+    }
 }

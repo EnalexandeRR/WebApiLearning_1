@@ -7,4 +7,5 @@ public interface INewsRepository
     Task<IEnumerable<NewsItem>> GetNewsAsync(GetNewsRequest request);
     Task<bool> AddNewsToDbAsync(AddNewsRequest request);
     Task<bool> DeleteNewsByIdAsync(DeleteByIdRequest request);
+    Task<DateTimeOffset?> GetLastAddedTime();
 }

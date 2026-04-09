@@ -17,27 +17,33 @@ public class NewsService: INewsService
         _newsClient = newsClient;
     }
     
-    public async Task<bool> FetchAndSaveNewsAsync(IJobExecutionContext context)
+    public async Task FetchAndSaveNewsAsync(IJobExecutionContext context)
     {
         try
         {
-            string htmlContent = await _newsClient.FetchNewsAsync(context.CancellationToken);
-            
-            List<NewsItem> newsItemsList = await NewsPageParser.ParseHtmlAsync(htmlContent);
-            
-            if (newsItemsList.Count > 0)
+            async Task<List<NewsItem>> ParseNews()
             {
-                newsItemsList.Sort((a,b)=> a.ReleaseTime.CompareTo(b.ReleaseTime) );
-                var isSaved  = await _repository.SaveNewsToDbAsync(newsItemsList);
-                Console.WriteLine("Received new news!");
-                return isSaved;
+                string htmlContent = await _newsClient.FetchNewsAsync(context.CancellationToken);
+                return await NewsPageParser.ParseHtmlAsync(htmlContent);
             }
-            return false;
+            Task<List<NewsItem>> parseNewsTask = ParseNews();
+            Task<DateTimeOffset?> getLastAddedTime = _repository.GetLastAddedTime();
+            await Task.WhenAll(parseNewsTask, getLastAddedTime);
+            
+            List<NewsItem> newsItemsList = parseNewsTask.Result;
+            if (newsItemsList.Count == 0) return;
+            
+            if (getLastAddedTime.Result != null)
+            {
+                newsItemsList.RemoveAll((article) => article.ReleaseTime <= getLastAddedTime.Result);
+            }
+            newsItemsList.Sort((a,b)=> a.ReleaseTime.CompareTo(b.ReleaseTime) );
+            await _repository.SaveNewsToDbAsync(newsItemsList);
+            Console.WriteLine("Received new news!");
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Something went wrong! Message: {ex.Message}, {ex.StackTrace}");
-            return false;
         }
     }
 
