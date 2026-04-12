@@ -37,6 +37,10 @@ public class NewsService: INewsService
             {
                 newsItemsList.RemoveAll((article) => article.ReleaseTime <= getLastAddedTime.Result);
             }
+            foreach (var newsItem in newsItemsList)
+            {
+                newsItem.IsAutoAdded = true;
+            }
             newsItemsList.Sort((a,b)=> a.ReleaseTime.CompareTo(b.ReleaseTime) );
             await _repository.SaveNewsToDbAsync(newsItemsList);
             Console.WriteLine("Received new news!");

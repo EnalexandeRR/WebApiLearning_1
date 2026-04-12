@@ -23,7 +23,7 @@ public class NewsRepository: INewsRepository
             db.Open();
             using (var transaction = db.BeginTransaction())
             {
-                var sqlQuery = $"INSERT INTO {_tableName} (title, releaseTime, viewCount) VALUES(@Title, @ReleaseTime, @ViewCount)";
+                var sqlQuery = $"INSERT INTO {_tableName} (title, releaseTime, viewCount, isAutoAdded) VALUES(@Title, @ReleaseTime, @ViewCount, @IsAutoAdded)";
                 await db.ExecuteAsync(sqlQuery, newsItems, transaction);
                 transaction.Commit();
             }
@@ -48,7 +48,7 @@ public class NewsRepository: INewsRepository
     {
         using (IDbConnection db = new SqliteConnection(_dbConnectionString))
         {
-            var sqlQuery = $"INSERT INTO {_tableName} (title, releaseTime, viewCount) VALUES(@Title, @ReleaseTime, @ViewCount)";
+            var sqlQuery = $"INSERT INTO {_tableName} (title, releaseTime, viewCount, isAutoAdded) VALUES(@Title, @ReleaseTime, @ViewCount, @IsAutoAdded)";
             DateTimeOffset dt = DateTimeOffset.Now;
             DateTimeOffset currentUniversalTime = dt.AddTicks(-(dt.Ticks % TimeSpan.TicksPerSecond)).ToUniversalTime();
             
@@ -56,7 +56,8 @@ public class NewsRepository: INewsRepository
             {
                 request.Title,
                 ReleaseTime = currentUniversalTime,
-                request.ViewCount
+                request.ViewCount,
+                IsAutoAdded = false
             });
             return lines > 0;
         }
@@ -76,7 +77,7 @@ public class NewsRepository: INewsRepository
     {
         using (IDbConnection db = new SqliteConnection(_dbConnectionString))
         {
-            var sqlQuery = $"SELECT MAX(releaseTime) FROM {_tableName}";
+            var sqlQuery = $"SELECT MAX(releaseTime) FROM {_tableName} where isAutoAdded = 1";
             var result = await db.QueryFirstOrDefaultAsync<DateTimeOffset?>(sqlQuery);
             return result;
         }

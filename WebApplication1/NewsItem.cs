@@ -6,6 +6,7 @@ public class NewsItem
     public string Title { get; set; }
     public DateTimeOffset ReleaseTime { get; set; }
     public int ViewCount { get; set; }
+    public bool IsAutoAdded { get; set; }
     
     public override string ToString()
     {
