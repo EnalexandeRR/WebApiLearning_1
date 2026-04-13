@@ -1,6 +1,8 @@
 using System.Data;
 using Dapper;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Options;
+using WebApplication1.Configuration;
 using WebApplication1.Models;
 
 namespace WebApplication1.Repositories;
@@ -10,10 +12,10 @@ public class NewsRepository: INewsRepository
 {
     private readonly string _dbConnectionString;
     private readonly string _tableName;
-    public NewsRepository(IConfiguration config)
+    public NewsRepository(IOptions<DatabaseOptions>  databaseOptions)
     {
-        _dbConnectionString = config.GetConnectionString("DefaultConnection");
-        _tableName = config.GetConnectionString("DefaultTableName");
+        _dbConnectionString = databaseOptions.Value.DefaultConnectionString;
+        _tableName = databaseOptions.Value.DefaultTableName;
     }
     
     public async Task<bool> SaveNewsToDbAsync(IEnumerable<NewsItem> newsItems)

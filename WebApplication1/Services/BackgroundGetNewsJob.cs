@@ -6,8 +6,6 @@ namespace WebApplication1.Services;
 
 public class BackgroundGetNewsJob : IJob
 {
-    private readonly INewsClient _newsClient;
-    private readonly INewsRepository _repository;
     private readonly INewsService _newsService;
 
     public BackgroundGetNewsJob(INewsService  newsService)
