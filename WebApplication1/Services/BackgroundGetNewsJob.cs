@@ -1,6 +1,4 @@
 using Quartz;
-using WebApplication1.Clients;
-using WebApplication1.Repositories;
 
 namespace WebApplication1.Services;
 

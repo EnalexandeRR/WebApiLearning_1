@@ -38,11 +38,11 @@ public class NewsRepository: INewsRepository
     public async Task<IEnumerable<NewsItem>> GetNewsAsync(GetNewsRequest request)
     {
         
-        Console.WriteLine($"Try to get news from {request.from} to {request.to}");
+        Console.WriteLine($"Try to get news from {request.From} to {request.To}");
         using (var db = new SqliteConnection(_dbConnectionString))
         {
            return await db.QueryAsync<NewsItem>("SELECT * FROM news WHERE releaseTime >= @from and releaseTime <= @to",
-               new { from = request.from.ToUniversalTime(),to = request.to.ToUniversalTime()} );
+               new { from = request.From?.ToUniversalTime(),to = request.To?.ToUniversalTime()} );
         }
     }
 
@@ -72,6 +72,20 @@ public class NewsRepository: INewsRepository
             var sqlQuery = $"DELETE FROM {_tableName} WHERE id = @Id";
             var deletedLines = await db.ExecuteAsync(sqlQuery, request);
             return deletedLines > 0;
+        }
+    }
+
+    public async Task<int> DeleteNewsByPeriodAsync(DeleteByPeriodRequest request)
+    {
+        Console.WriteLine($"Period is from:{request.From} to:{request.To}");
+        using (IDbConnection db = new SqliteConnection(_dbConnectionString))
+        {
+            var sqlQuery = $"DELETE FROM {_tableName} WHERE (@From IS NULL OR releaseTime >= @From) AND (@To IS NULL OR releaseTime <= @To)";
+            return await db.ExecuteAsync(sqlQuery, new
+            {
+                From = request.From?.ToUniversalTime(),
+                To = request.To?.ToUniversalTime()
+            });
         }
     }
 

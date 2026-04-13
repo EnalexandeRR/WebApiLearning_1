@@ -2,6 +2,6 @@ namespace WebApplication1.Models;
 
 public class DeleteByPeriodRequest
 {
-    public DateTimeOffset from { get; set; }
-    public DateTimeOffset to { get; set; }
+    public DateTimeOffset? From { get; set; }
+    public DateTimeOffset? To { get; set; }
 }

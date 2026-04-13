@@ -1,5 +1,5 @@
-using Quartz;
 using WebApplication1.Models;
+using Quartz;
 
 namespace WebApplication1.Services;
 
@@ -9,4 +9,5 @@ public interface INewsService
     Task<IEnumerable<NewsItem>> GetNewsByPeriodAsync(GetNewsRequest request);
     Task<bool> AddNewsManualAsync(AddNewsRequest request);
     Task<bool> DeleteNewsByIdAsync(DeleteByIdRequest request);
+    Task<int> DeleteNewsByPeriodAsync(DeleteByPeriodRequest request);
 }
