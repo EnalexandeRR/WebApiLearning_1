@@ -13,6 +13,7 @@ public class NewsService : INewsService
 
     public NewsService(INewsRepository repository, INewsClient newsClient)
     {
+        
         _repository = repository;
         _newsClient = newsClient;
     }
@@ -46,34 +47,39 @@ public class NewsService : INewsService
 
             newsItemsList.Sort((a, b) => a.ReleaseTime.CompareTo(b.ReleaseTime));
             await _repository.SaveNewsToDbAsync(newsItemsList);
-            Console.WriteLine("Received new news!");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Something went wrong! Message: {ex.Message}, {ex.StackTrace}");
+            Console.WriteLine($"Something went wrong while parsing and saving news! Message: {ex.Message}, {ex.StackTrace}");
         }
     }
 
     public async Task<IEnumerable<NewsItem>> GetNewsByPeriodAsync(GetNewsRequest request)
     {
-        if (request.From == null && request.To == null) throw new ArgumentException("No data period specified!");
+        if (request.From == null && request.To == null) throw new ValidationException("No data period specified!");
+        if(request.From > request.To) throw new ValidationException("Start date must be less than end date!");
         
         return await _repository.GetNewsAsync(request);
     }
 
     public async Task<bool> AddNewsManualAsync(AddNewsRequest request)
     {
+        if (string.IsNullOrEmpty(request.Title)) throw new ValidationException("No news title specified!");
+        
         return await _repository.AddNewsToDbAsync(request);
     }
 
     public async Task<bool> DeleteNewsByIdAsync(DeleteByIdRequest request)
     {
+        if(request.Id == null) throw new ValidationException("No news id specified!");
+        
         return await _repository.DeleteNewsByIdAsync(request);
     }
 
     public async Task<int> DeleteNewsByPeriodAsync(DeleteByPeriodRequest request)
     {
-        if (request.From == null && request.To == null) throw new ArgumentException("No data period specified!");
+        if (request.From == null && request.To == null) throw new ValidationException("No data period specified!");
+        if(request.From > request.To) throw new ValidationException("Start date must be less than end date!");
         
         return await _repository.DeleteNewsByPeriodAsync(request);
     }

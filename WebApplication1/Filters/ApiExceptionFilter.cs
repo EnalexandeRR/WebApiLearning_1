@@ -6,13 +6,15 @@ namespace WebApplication1.Filters;
 
 public class ApiExceptionFilter : IExceptionFilter
 {
+    
+    
     public void OnException(ExceptionContext context)
     {
         if (context.Exception is ArgumentException exception)
         {
             context.Result = new OkObjectResult(new BaseResponse
             {
-                StatusCode = 0,
+                StatusCode = -999,
                 Message = exception.Message
             });
         }

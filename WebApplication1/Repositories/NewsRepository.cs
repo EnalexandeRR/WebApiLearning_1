@@ -41,8 +41,8 @@ public class NewsRepository: INewsRepository
         Console.WriteLine($"Try to get news from {request.From} to {request.To}");
         using (var db = new SqliteConnection(_dbConnectionString))
         {
-           return await db.QueryAsync<NewsItem>("SELECT * FROM news WHERE releaseTime >= @from and releaseTime <= @to",
-               new { from = request.From?.ToUniversalTime(),to = request.To?.ToUniversalTime()} );
+           return await db.QueryAsync<NewsItem>("SELECT * FROM news WHERE (@From IS NULL OR releaseTime >= @From) AND (@To IS NULL OR releaseTime <= @To)",
+               new { From = request.From?.ToUniversalTime(),To = request.To?.ToUniversalTime()} );
         }
     }
 
