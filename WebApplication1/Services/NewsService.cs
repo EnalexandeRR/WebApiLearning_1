@@ -29,23 +29,21 @@ public class NewsService : INewsService
             }
 
             Task<List<NewsItem>> parseNewsTask = ParseNews();
-            Task<DateTimeOffset?> getLastAddedTime = _repository.GetLastAddedTime();
-            await Task.WhenAll(parseNewsTask, getLastAddedTime);
+            Task<DateTimeOffset?> lastAddedTime = _repository.GetLastAddedTime();
+            await Task.WhenAll(parseNewsTask, lastAddedTime);
 
             List<NewsItem> newsItemsList = parseNewsTask.Result;
             if (newsItemsList.Count == 0) return;
 
-            if (getLastAddedTime.Result != null)
+            if (lastAddedTime.Result != null)
             {
-                newsItemsList.RemoveAll((article) => article.ReleaseTime <= getLastAddedTime.Result);
+                newsItemsList.RemoveAll((article) => article.ReleaseTime <= lastAddedTime.Result);
             }
 
-            foreach (var newsItem in newsItemsList)
-            {
-                newsItem.IsAutoAdded = true;
-            }
+            foreach (var newsItem in newsItemsList) newsItem.IsAutoAdded = true;
 
             newsItemsList.Sort((a, b) => a.ReleaseTime.CompareTo(b.ReleaseTime));
+
             await _repository.SaveNewsToDbAsync(newsItemsList);
         }
         catch (Exception ex)
@@ -54,7 +52,7 @@ public class NewsService : INewsService
         }
     }
 
-    public async Task<IEnumerable<NewsItem>> GetNewsByPeriodAsync(GetNewsRequest request)
+    public async Task<IEnumerable<GetNewsResponseDTO>> GetNewsByPeriodAsync(GetNewsRequest request)
     {
         if (request.From == null && request.To == null) throw new ValidationException("No data period specified!");
         if(request.From > request.To) throw new ValidationException("Start date must be less than end date!");

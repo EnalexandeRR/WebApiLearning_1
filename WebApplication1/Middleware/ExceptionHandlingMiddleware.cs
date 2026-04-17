@@ -1,5 +1,6 @@
 using Microsoft.Data.Sqlite;
 using WebApplication1.Models;
+using WebApplication1.Helpers;
 
 namespace WebApplication1.Middleware;
 
@@ -17,6 +18,7 @@ public class ExceptionHandlingMiddleware
         try
         {
             await _next(httpContext);
+            
         }
         catch (Exception ex)
         {
@@ -29,7 +31,7 @@ public class ExceptionHandlingMiddleware
                     var response = new BaseResponse()
                     {
                         StatusCode = -1,
-                        Message = ex.Message
+                        Message = ex.Message.Customize()
                     };
 
                     await httpContext.Response.WriteAsJsonAsync(response);
@@ -42,7 +44,7 @@ public class ExceptionHandlingMiddleware
                     var response = new BaseResponse()
                     {
                         StatusCode = -888,
-                        Message = "Something is wrong with database!!!"
+                        Message = "Something is wrong with database!!!".Customize()
                     };
 
                     await httpContext.Response.WriteAsJsonAsync(response);
@@ -50,8 +52,16 @@ public class ExceptionHandlingMiddleware
                     break;
                 default:
                 {
-                    throw;
-                }
+                    httpContext.Response.StatusCode = StatusCodes.Status200OK;
+
+                    var response = new BaseResponse()
+                    {
+                        StatusCode = -999,
+                        Message = ex.Message
+                    };
+
+                    await httpContext.Response.WriteAsJsonAsync(response);
+                }break;
             }
             
         }

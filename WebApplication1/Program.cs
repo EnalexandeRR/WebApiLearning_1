@@ -32,10 +32,18 @@ builder.Services.AddQuartz(options =>
                     .WithIntervalInSeconds(newsJobOptions.IntervalInSeconds).RepeatForever()));
 });
 builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 SqlMapper.AddTypeHandler(new SqliteDateTimeOffsetHandler());
 
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI( c=> c.EnableTryItOutByDefault()); 
+}
+app.UseRouting();
 app.MapControllers();
 app.Run();
