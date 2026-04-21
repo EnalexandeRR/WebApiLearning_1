@@ -1,5 +1,6 @@
 using System.Text;
 using Dapper;
+using Microsoft.Extensions.Options;
 using Quartz;
 using WebApplication1.Clients;
 using WebApplication1.Configuration;
@@ -18,7 +19,13 @@ builder.Services.Configure<NewsJobOptions>(builder.Configuration.GetSection(name
 
 builder.Services.AddScoped<INewsRepository, NewsRepository>();
 builder.Services.AddScoped<INewsService, NewsService>();
-builder.Services.AddHttpClient<INewsClient, NewsClient>();
+builder.Services.AddHttpClient<INewsClient, NewsClient>((serviceProvider, client) =>
+    {
+        var options = serviceProvider.GetRequiredService<IOptions<NewsClientOptions>>();
+        
+        client.BaseAddress = new Uri(options.Value.BaseUrl);
+        client.Timeout = TimeSpan.FromSeconds(options.Value.TimeoutSeconds);
+    });
 
 builder.Services.AddQuartz(options =>
 {
