@@ -9,7 +9,7 @@ public class SqliteDateTimeOffsetHandler: SqlMapper.TypeHandler<DateTimeOffset>
     public override void SetValue(IDbDataParameter parameter, DateTimeOffset value)
     {
         // Превращаем дату в идеальную ISO 8601 строку (буква "O")
-        parameter.Value = value.ToUniversalTime().ToString("O"); 
+        parameter.Value = value.ToUniversalTime();
     }
 
     // Как читать из базы (String -> DateTimeOffset)

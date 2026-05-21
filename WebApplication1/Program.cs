@@ -1,6 +1,9 @@
+using System.Data;
 using System.Text;
 using Dapper;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Options;
+using Npgsql;
 using Quartz;
 using WebApplication1.Clients;
 using WebApplication1.Configuration;
@@ -10,6 +13,7 @@ using WebApplication1.Repositories;
 using WebApplication1.Services;
 
 Console.OutputEncoding = Encoding.UTF8;
+Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
@@ -19,6 +23,16 @@ builder.Services.Configure<NewsJobOptions>(builder.Configuration.GetSection(name
 
 builder.Services.AddScoped<INewsRepository, NewsRepository>();
 builder.Services.AddScoped<INewsService, NewsService>();
+/*builder.Services.AddScoped<IDbConnection>(sp => 
+{
+    var options = sp.GetRequiredService<IOptions<DatabaseOptions>>().Value;
+    return new NpgsqlConnection(options.DefaultConnectionString);
+});*/
+builder.Services.AddScoped<IDbConnection>(sp => 
+{
+    var options = sp.GetRequiredService<IOptions<DatabaseOptions>>().Value;
+    return new SqlConnection(options.DefaultConnectionString);
+});
 builder.Services.AddHttpClient<INewsClient, NewsClient>((serviceProvider, client) =>
     {
         var options = serviceProvider.GetRequiredService<IOptions<NewsClientOptions>>();

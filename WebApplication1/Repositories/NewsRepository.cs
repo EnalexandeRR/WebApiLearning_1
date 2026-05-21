@@ -1,8 +1,5 @@
 using System.Data;
 using Dapper;
-using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.Options;
-using WebApplication1.Configuration;
 using WebApplication1.Models;
 
 namespace WebApplication1.Repositories;
@@ -10,25 +7,20 @@ namespace WebApplication1.Repositories;
 
 public class NewsRepository: INewsRepository
 {
-    private readonly string _dbConnectionString;
-    private readonly string _tableName;
-    public NewsRepository(IOptions<DatabaseOptions>  databaseOptions)
+    private readonly IDbConnection _db;
+    public NewsRepository(IDbConnection db)
     {
-        _dbConnectionString = databaseOptions.Value.DefaultConnectionString;
-        _tableName = databaseOptions.Value.DefaultTableName;
+        _db = db;
     }
     
     public async Task<bool> SaveNewsToDbAsync(IEnumerable<NewsItem> newsItems)
     {
-        using (IDbConnection db = new SqliteConnection(_dbConnectionString))
+        _db.Open();
+        using (var transaction = _db.BeginTransaction())
         {
-            db.Open();
-            using (var transaction = db.BeginTransaction())
-            {
-                var sqlQuery = $"INSERT INTO {_tableName} (title, releaseTime, viewCount, isAutoAdded) VALUES(@Title, @ReleaseTime, @ViewCount, @IsAutoAdded)";
-                await db.ExecuteAsync(sqlQuery, newsItems, transaction);
-                transaction.Commit();
-            }
+            var sqlQuery = $"INSERT INTO news (title, release_time, view_count, is_auto_added) VALUES(@Title, @ReleaseTime, @ViewCount, @IsAutoAdded)";
+            await _db.ExecuteAsync(sqlQuery, newsItems, transaction);
+            transaction.Commit();
         }
         Console.WriteLine("(TEST) news item created in DATABASE!");
         //TODO: only for tests now!
@@ -39,62 +31,49 @@ public class NewsRepository: INewsRepository
     {
         
         Console.WriteLine($"Try to get news from {request.From} to {request.To}");
-        using (var db = new SqliteConnection(_dbConnectionString))
-        {
-           return await db.QueryAsync<GetNewsResponseDTO>($"SELECT * FROM {_tableName} WHERE (@From IS NULL OR releaseTime >= @From) AND (@To IS NULL OR releaseTime <= @To)",
+           return await _db.QueryAsync<GetNewsResponseDTO>($"SELECT * FROM news WHERE (@From IS NULL OR release_time >= @From) AND (@To IS NULL OR release_time <= @To)",
                new { From = request.From?.ToUniversalTime(),To = request.To?.ToUniversalTime()} );
-        }
     }
 
     public async Task<bool> AddNewsToDbAsync(AddNewsRequest request)
     {
-        using (IDbConnection db = new SqliteConnection(_dbConnectionString))
-        {
-            var sqlQuery = $"INSERT INTO {_tableName} (title, releaseTime, viewCount, isAutoAdded) VALUES(@Title, @ReleaseTime, @ViewCount, @IsAutoAdded)";
-            DateTimeOffset dt = DateTimeOffset.Now;
-            DateTimeOffset currentUniversalTime = dt.AddTicks(-(dt.Ticks % TimeSpan.TicksPerSecond)).ToUniversalTime();
+        var sqlQuery = $"INSERT INTO news (title, release_time, view_count, is_auto_added) VALUES(@Title, @ReleaseTime, @ViewCount, @IsAutoAdded)";
+        DateTimeOffset dt = DateTimeOffset.Now;
+        DateTimeOffset currentUniversalTime = dt.AddTicks(-(dt.Ticks % TimeSpan.TicksPerSecond)).ToUniversalTime();
             
-            var lines = await db.ExecuteAsync(sqlQuery, new
-            {
-                request.Title,
-                ReleaseTime = currentUniversalTime,
-                request.ViewCount,
-                IsAutoAdded = false
-            });
-            return lines > 0;
-        }
+        var lines = await _db.ExecuteAsync(sqlQuery, new
+        {
+            request.Title,
+            ReleaseTime = currentUniversalTime,
+            request.ViewCount,
+            IsAutoAdded = false
+        });
+        return lines > 0;
     }
 
     public async Task<bool> DeleteNewsByIdAsync(DeleteByIdRequest request)
     {
-        using (IDbConnection db = new SqliteConnection(_dbConnectionString))
-        {
-            var sqlQuery = $"DELETE FROM {_tableName} WHERE id = @Id";
-            var deletedLines = await db.ExecuteAsync(sqlQuery, request);
-            return deletedLines > 0;
-        }
+        var sqlQuery = $"DELETE FROM news WHERE id = @Id";
+        var deletedLines = await _db.ExecuteAsync(sqlQuery, request);
+        return deletedLines > 0;
     }
 
     public async Task<int> DeleteNewsByPeriodAsync(DeleteByPeriodRequest request)
     {
-        using (IDbConnection db = new SqliteConnection(_dbConnectionString))
+        var sqlQuery = $"DELETE FROM news WHERE (@From IS NULL OR release_time >= @From) AND (@To IS NULL OR release_time <= @To)";
+        return await _db.ExecuteAsync(sqlQuery, new
         {
-            var sqlQuery = $"DELETE FROM {_tableName} WHERE (@From IS NULL OR releaseTime >= @From) AND (@To IS NULL OR releaseTime <= @To)";
-            return await db.ExecuteAsync(sqlQuery, new
-            {
-                From = request.From?.ToUniversalTime(),
-                To = request.To?.ToUniversalTime()
-            });
-        }
+            From = request.From?.ToUniversalTime(),
+            To = request.To?.ToUniversalTime()
+        });
     }
 
     public async Task<DateTimeOffset?> GetLastAddedTime()
     {
-        using (IDbConnection db = new SqliteConnection(_dbConnectionString))
-        {
-            var sqlQuery = $"SELECT MAX(releaseTime) FROM {_tableName} where isAutoAdded = 1";
-            var result = await db.QueryFirstOrDefaultAsync<DateTimeOffset?>(sqlQuery);
-            return result;
-        }
+        var sqlQuery = $"SELECT MAX(release_time) FROM news where is_auto_added = 1";
+        var fieldResult = await _db.QueryFirstOrDefaultAsync<DateTime?>(sqlQuery);
+        DateTimeOffset? result = fieldResult.HasValue ? new DateTimeOffset(fieldResult.Value, TimeSpan.Zero) : null;
+        Console.WriteLine($"Last added time is {result}");
+        return result;
     }
 }
